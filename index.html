@@ -111,6 +111,23 @@
         0% { opacity: 0; transform: scale(0.9); }
         100% { opacity: 0.4; transform: scale(1.2); }
     } 
+        /* Animation fermeture pop-up (Slide Down) */
+    .modal-content-exit {
+        animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideDown {
+        from { opacity: 1; transform: translate(-50%, -50%); }
+        to { opacity: 0; transform: translate(-50%, 100%); }
+    }
+
+    /* Animation suppression article (Glissement poubelle) */
+    .item-delete-anim {
+        animation: slideOutTrash 0.3s ease-in forwards;
+    }
+    @keyframes slideOutTrash {
+        50% { opacity: 0.5; transform: scale(0.95) translateX(10px); }
+        100% { opacity: 0; transform: scale(0.9) translateX(50px); }
+    } 
     </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
@@ -392,16 +409,22 @@
                 } else {
                     addToCartBtn.disabled = false;
                    addToCartBtn.innerHTML = `
-                <span class="text-span w-full" style="display: flex !important; justify-content: center; align-items: center; gap: 8px;">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm6 16c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2z"></path></svg>
-                    Ajouter au panier
-                </span>
-                <div class="cart-icon-wrapper">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <div class="cart-box"></div>
-                </div>
-            `;
-            addToCartBtn.className = "cart-btn-anim flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center transition-all duration-300";
+                    <!-- État par défaut -->
+                    <div class="content-default flex items-center justify-center gap-2 w-full transition-opacity duration-300">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm6 16c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2z"></path></svg>
+                        Ajouter au panier
+                    </div>
+                    <!-- État d'ajout (Chariot + Boîte) -->
+                    <div class="content-adding absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <svg class="w-6 h-6 text-white cart-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <div class="falling-box w-2 h-2 bg-white rounded-sm absolute top-[-10px] left-1/2 -translate-x-1/2"></div>
+                    </div>
+                    <!-- État de succès (Coche verte) -->
+                    <div class="content-success absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <svg class="w-7 h-7 text-white check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                `;
+                addToCartBtn.className = "smart-cart-btn relative flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center mx-auto overflow-hidden";
                 }
             } 
         }
@@ -473,14 +496,20 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
            // Affiche la bulle de succès
     showToast("Article ajouté au panier !", "success");
 
-    // Anime le bouton avec le chariot
+// Anime le bouton avec la transition fluide (ajout -> succès -> retour)
     const btn = document.querySelector('button[onclick="addToCart()"]');
-    if (btn && !btn.classList.contains('is-animating')) {
-        btn.classList.add('is-animating');
+    if (btn && !btn.classList.contains('is-adding') && !btn.classList.contains('is-success')) {
+        btn.classList.add('is-adding'); // Démarre le chariot
         
-        // Retire la classe après 2.5 secondes (la durée de l'animation CSS)
+        // Passe au cercle vert après 1.2 secondes
         setTimeout(() => {
-            btn.classList.remove('is-animating');
+            btn.classList.remove('is-adding');
+            btn.classList.add('is-success');
+        }, 1200);
+        
+        // Revient à l'état normal après 2.5 secondes
+        setTimeout(() => {
+            btn.classList.remove('is-success');
         }, 2500);
     } 
         } 
@@ -497,16 +526,30 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
             }
         }
 
-        function removeFromCart(variantName) {
-            state.cart = state.cart.filter(item => item.variant !== variantName);
-            localStorage.setItem('evastouch_cart', JSON.stringify(state.cart));
-            updateCartBadge();
-            if (state.cart.length === 0) {
-                closeModal();
-            } else {
-                openModal();
+        function removeFromCart(variantName, btnElement) {
+            // Si on a bien le bouton, on anime la ligne
+            if (btnElement) {
+                const itemRow = btnElement.closest('.bg-eva-beige');
+                if (itemRow) {
+                    itemRow.classList.add('item-delete-anim');
+                    // On fait rougir et tourner un peu la poubelle
+                    btnElement.classList.add('text-red-600');
+                    btnElement.style.transform = "rotate(15deg)";
+                }
             }
-        }
+
+            // On attend la fin de l'animation (300ms) pour supprimer l'article de la mémoire
+            setTimeout(() => {
+                state.cart = state.cart.filter(item => item.variant !== variantName);
+                localStorage.setItem('evastouch_cart', JSON.stringify(state.cart));
+                updateCartBadge();
+                if (state.cart.length === 0) {
+                    closeModal(); // Ferme avec le beau slide down si le panier est vide
+                } else {
+                    openModal(); // Recharge le reste du panier
+                }
+            }, 300);
+        } 
 
         function updateCartItemQty(variantName, change) {
             const itemIndex = state.cart.findIndex(i => i.variant === variantName);
@@ -557,7 +600,7 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
                         </div>
                     </div>
                     <div class="text-right flex flex-col items-end justify-between h-full">
-                        <button type="button" onclick="removeFromCart('${item.variant}')" class="text-gray-400 hover:text-red-500 p-1 mb-1">
+<button type="button" onclick="removeFromCart('${item.variant}', this)" class="text-gray-400 hover:text-red-500 p-1 mb-1 transition-transform hover:scale-110">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                         <p class="font-bold text-gray-900">${item.price * item.qty} DZD</p>
@@ -578,10 +621,18 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
         } 
 
         function closeModal() {
-            document.getElementById('checkout-modal').classList.add('hidden');
-            document.getElementById('modal-box').classList.remove('modal-content-enter');
-            document.body.style.overflow = 'auto';
-        }
+            const modalBox = document.getElementById('modal-box');
+            // On lance l'animation de sortie
+            modalBox.classList.remove('modal-content-enter');
+            modalBox.classList.add('modal-content-exit');
+            
+            // On attend 350ms (la durée de l'animation) avant de cacher le modal
+            setTimeout(() => {
+                document.getElementById('checkout-modal').classList.add('hidden');
+                modalBox.classList.remove('modal-content-exit'); // On nettoie pour la prochaine fois
+                document.body.style.overflow = 'auto';
+            }, 350);
+        } 
 
         // --- YALIDINE API LOGIC ---
         async function loadWilayas() {
@@ -994,36 +1045,43 @@ function showToast(message, type = 'success') {
         animation: driveCart 2.5s ease-in-out forwards;
     }
 
-    /* La petite boîte qui tombe */
-    .cart-btn-anim .cart-box {
-        position: absolute; 
-        top: -20px; 
-        left: 50%;
-        transform: translateX(-50%);
-        width: 12px; 
-        height: 12px; 
-        background: white; 
-        border-radius: 2px;
-        opacity: 0;
+/* Animation du bouton Add to Cart Fluide */
+    .smart-cart-btn {
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
-    .cart-btn-anim.is-animating .cart-box {
-        animation: dropBox 2.5s ease-in-out forwards;
+    /* Étape 1 : Ovale avec chariot */
+    .smart-cart-btn.is-adding {
+        flex: none !important;
+        width: 120px !important;
+        border-radius: 30px;
     }
+    .smart-cart-btn.is-adding .content-default { opacity: 0; }
+    .smart-cart-btn.is-adding .content-adding { opacity: 1; }
+    .smart-cart-btn.is-adding .falling-box { animation: dropItem 0.5s forwards 0.2s; }
+    .smart-cart-btn.is-adding .cart-icon { animation: slideCart 1.2s forwards; }
 
-    /* Scénario d'animation du chariot */
-    @keyframes driveCart {
-        0% { transform: translate(-150px, -50%); opacity: 0; }
-        20%, 60% { transform: translate(-50%, -50%); opacity: 1; }
-        80%, 100% { transform: translate(100px, -50%); opacity: 0; }
+    /* Étape 2 : Cercle vert avec coche */
+    .smart-cart-btn.is-success {
+        flex: none !important;
+        width: 52px !important;
+        background-color: #22c55e !important;
+        border-radius: 50%;
     }
+    .smart-cart-btn.is-success .content-default, .smart-cart-btn.is-success .content-adding { opacity: 0; }
+    .smart-cart-btn.is-success .content-success { opacity: 1; }
+    .smart-cart-btn.is-success .check-icon { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-    /* Scénario d'animation de la boîte */
-    @keyframes dropBox {
-        0%, 20% { top: -20px; opacity: 0; }
-        30% { top: -20px; opacity: 1; }
-        45%, 60% { top: 25%; opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
-        80%, 100% { top: 25%; opacity: 0; transform: translate(100px, -50%) scale(0.8); }
+    @keyframes dropItem {
+        0% { top: -15px; opacity: 0; }
+        30% { opacity: 1; }
+        100% { top: 20px; opacity: 0; transform: translateX(-50%) scale(0.5); }
     }
+    @keyframes slideCart {
+        0% { transform: translateX(-20px); opacity: 0; }
+        20% { transform: translateX(0); opacity: 1; }
+        80% { transform: translateX(0); opacity: 1; }
+        100% { transform: translateX(20px); opacity: 0; }
+    } 
 </style> 
     
     <div id="toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-3 pointer-events-none w-[90%] max-w-sm"></div> 
