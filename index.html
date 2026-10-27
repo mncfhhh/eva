@@ -479,7 +479,7 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
             
         function openModal() {
             if (state.cart.length === 0) {
-                alert("Votre panier est vide.");
+                showToast("Votre panier est vide.", "error");
                 return;
             }
             
