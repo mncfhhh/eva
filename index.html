@@ -338,11 +338,17 @@
                     addToCartBtn.className = "flex-1 h-[52px] bg-gray-300 text-gray-500 rounded-2xl font-bold flex items-center justify-center cursor-not-allowed";
                 } else {
                     addToCartBtn.disabled = false;
-                    addToCartBtn.innerHTML = `
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM7 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zm0-3l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM5.21 6h14.65l-2.76 5H8.53L5.21 6z"/><path d="M12 2v3H9v2h3v3h2V7h3V5h-3V2z"/></svg>
-                        Ajouter au panier
-                    `;
-                    addToCartBtn.className = "flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors";
+                   addToCartBtn.innerHTML = `
+                <span class="text-span flex items-center justify-center gap-2 w-full">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm6 16c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2z"></path></svg>
+                    Ajouter au panier
+                </span>
+                <div class="cart-icon-wrapper">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <div class="cart-box"></div>
+                </div>
+            `;
+            addToCartBtn.className = "cart-btn-anim flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center transition-all duration-300";
                 }
             } 
         }
@@ -414,17 +420,15 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
            // Affiche la bulle de succès
     showToast("Article ajouté au panier !", "success");
 
-    // Anime le bouton "Ajouter au panier"
+    // Anime le bouton avec le chariot
     const btn = document.querySelector('button[onclick="addToCart()"]');
-    if (btn) {
-        const texteOriginal = btn.innerHTML;
-        btn.innerHTML = '✓ Ajouté ! ✅';
-        btn.classList.add('!bg-green-500', '!text-white');
+    if (btn && !btn.classList.contains('is-animating')) {
+        btn.classList.add('is-animating');
         
+        // Retire la classe après 2.5 secondes (la durée de l'animation CSS)
         setTimeout(() => {
-            btn.innerHTML = texteOriginal;
-            btn.classList.remove('!bg-green-500', '!text-white');
-        }, 3000);
+            btn.classList.remove('is-animating');
+        }, 2500);
     } 
         } 
 
@@ -902,6 +906,67 @@ function showToast(message, type = 'success') {
 } 
         
     </script>
+
+<style>
+    /* Conteneur principal du bouton */
+    .cart-btn-anim { 
+        position: relative; 
+        overflow: hidden; 
+    }
+    
+    /* Le texte "Ajouter au panier" */
+    .cart-btn-anim .text-span { 
+        transition: all 0.3s ease; 
+        display: inline-block; 
+    }
+    .cart-btn-anim.is-animating .text-span { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+
+    /* Le chariot qui roule */
+    .cart-btn-anim .cart-icon-wrapper {
+        position: absolute; 
+        top: 50%; 
+        left: 50%;
+        transform: translate(-150px, -50%);
+        opacity: 0;
+    }
+    .cart-btn-anim.is-animating .cart-icon-wrapper {
+        animation: driveCart 2.5s ease-in-out forwards;
+    }
+
+    /* La petite boîte qui tombe */
+    .cart-btn-anim .cart-box {
+        position: absolute; 
+        top: -20px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px; 
+        height: 12px; 
+        background: white; 
+        border-radius: 2px;
+        opacity: 0;
+    }
+    .cart-btn-anim.is-animating .cart-box {
+        animation: dropBox 2.5s ease-in-out forwards;
+    }
+
+    /* Scénario d'animation du chariot */
+    @keyframes driveCart {
+        0% { transform: translate(-150px, -50%); opacity: 0; }
+        20%, 60% { transform: translate(-50%, -50%); opacity: 1; }
+        80%, 100% { transform: translate(100px, -50%); opacity: 0; }
+    }
+
+    /* Scénario d'animation de la boîte */
+    @keyframes dropBox {
+        0%, 20% { top: -20px; opacity: 0; }
+        30% { top: -20px; opacity: 1; }
+        45%, 60% { top: 25%; opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
+        80%, 100% { top: 25%; opacity: 0; transform: translate(100px, -50%) scale(0.8); }
+    }
+</style> 
     
     <div id="toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-3 pointer-events-none w-[90%] max-w-sm"></div> 
 
