@@ -69,6 +69,17 @@
             transform: scale(1.1);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+        @keyframes popIn {
+        0% { transform: scale(0.5); opacity: 0; }
+        70% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); }
+    }
+    .success-icon-anim { 
+        animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+    }
+    .fade-in-section { 
+        animation: fadeIn 0.4s ease-out forwards; 
+    } 
     </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
@@ -164,8 +175,8 @@
 
             <div class="p-6 overflow-y-auto hide-scrollbar flex-grow bg-white">
                 
-                <div id="success-state" class="hidden flex-col items-center justify-center py-12 text-center">
-                    <div class="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
+               <div id="success-state" class="hidden flex-col items-center justify-center py-12 text-center w-full min-h-[350px]">
+                    <div class="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner mx-auto success-icon-anim"> 
                         <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Commande confirmée !</h3>
@@ -836,7 +847,10 @@ const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0
 
                 document.getElementById('checkout-form').classList.add('hidden');
                 document.getElementById('modal-footer').classList.add('hidden');
-                document.getElementById('success-state').classList.remove('hidden');
+                
+                const successState = document.getElementById('success-state');
+                successState.classList.remove('hidden');
+                successState.classList.add('fade-in-section');
                 
                 state.cart = [];
                 localStorage.removeItem('evastouch_cart');
