@@ -46,6 +46,12 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
+        .modal-enter { animation: fadeIn 0.3s ease-out forwards; }
+        .modal-content-enter { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
         input[type="radio"].eva-radio {
             accent-color: #7a2e44;
             width: 1.25rem; height: 1.25rem;
@@ -58,44 +64,23 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Custom Keyframes for interactions */
-        @keyframes bounce-pop {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.3); }
-            60% { transform: scale(0.9); }
-            80% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .variant-btn.active {
+            border-color: #7a2e44;
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .animate-bounce-pop {
-            animation: bounce-pop 0.5s cubic-bezier(0.28, 0.84, 0.42, 1) forwards;
-        }
-
-        /* Toast animations */
-        .toast-enter { transform: translateX(120%); opacity: 0; }
-        .toast-enter-active { transform: translateX(0); opacity: 1; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .toast-leave-active { transform: translateX(120%); opacity: 0; transition: all 0.3s ease-in; }
-
-        /* Modal transitions */
-        .modal-overlay { transition: opacity 0.3s ease-out; }
-        .modal-content { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col relative">
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- TOAST CONTAINER -->
-    <div id="toast-container" class="fixed top-20 right-4 z-[9999] flex flex-col gap-3 pointer-events-none w-max max-w-[90vw]"></div>
-
-    <header class="bg-white shadow-sm py-2 sticky top-0 z-40">
+    <header class="bg-white shadow-sm py-0.5 sticky top-0 z-40">
         <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
             <div class="text-2xl font-bold text-eva-burgundy tracking-wide">Eva's Touch 🌸</div>
-            <button id="cart-header-btn" onclick="openModal()" class="relative p-2 text-eva-burgundy hover:bg-eva-pinkLight rounded-full transition-colors duration-200">
+            <button onclick="openModal()" class="relative p-2 text-eva-burgundy hover:bg-eva-pinkLight rounded-full transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                <!-- Badge container that will bounce -->
-                <div id="cart-badge-container" class="absolute -top-1 -right-1 flex items-center justify-center hidden">
-                    <span id="cart-count" class="bg-eva-burgundy text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">0</span>
-                </div>
+                <span id="cart-count" class="absolute top-0 right-0 bg-eva-burgundy text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden">0</span>
             </button>
         </div>
     </header>
@@ -114,20 +99,19 @@
                 Protégez vos vêtements avec élégance. Notre tablier imperméable et anti-taches est conçu pour le confort au quotidien. Taille ajustable, poches pratiques et tissu anti-taches et imperméable 😍🫶🏻.
             </p>
 
-            <div class="w-full flex flex-col gap-4 mt-6 mb-6"> 
-                <div class="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-white shadow-md border border-eva-pinkLight">
-                    <span class="absolute top-4 left-4 bg-eva-burgundy text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider z-10 shadow-sm">Best Seller</span>
-                    <img id="main-image" src="" alt="Tablier de cuisine" class="w-full h-full object-cover transition-opacity duration-300">
-                </div>
-            </div> 
+        <div class="w-full flex flex-col gap-4 mt-6 mb-6"> 
+            <div class="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-white shadow-md border border-eva-pinkLight">
+                <span class="absolute top-4 left-4 bg-eva-burgundy text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider z-10 shadow-sm">Best Seller</span>
+                <img id="main-image" src="" alt="Tablier de cuisine" class="w-full h-full object-cover transition-opacity duration-300">
+            </div>
+        </div> 
 
             <div class="mb-8">
-                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3 flex justify-between">
                     <span>Couleur • اللون</span>
-                    <span id="selected-color-name" class="text-eva-burgundy font-bold px-3 py-1 bg-eva-pinkLight rounded-full text-xs"></span>
+                    <span id="selected-color-name" class="text-eva-burgundy font-bold"></span>
                 </h3>
                 <div class="grid grid-cols-2 gap-4" id="variant-selector">
-                    <!-- Généré dynamiquement en JS -->
                 </div>
             </div>
 
@@ -135,17 +119,16 @@
                 <div class="flex items-center gap-3 w-full">
                     <div class="flex items-center border border-gray-300 rounded-2xl bg-white px-4 py-3 h-[52px]">
                         <button onclick="changeCurrentQty(-1)" class="text-gray-500 hover:text-black text-xl font-medium px-2">&minus;</button>
-                        <span id="display-current-qty" class="text-gray-900 font-medium text-lg px-4 w-10 text-center">1</span>
+                        <span id="display-current-qty" class="text-gray-900 font-medium text-lg px-4">1</span>
                         <button onclick="changeCurrentQty(1)" class="text-gray-500 hover:text-black text-xl font-medium px-2">+</button>
                     </div>
-                    <!-- Bouton Ajouter au panier (Sera animé par JS) -->
-                    <button id="add-to-cart-btn" onclick="addToCart()" class="flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-md">
-                        <svg id="btn-icon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM7 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zm0-3l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM5.21 6h14.65l-2.76 5H8.53L5.21 6z"/><path d="M12 2v3H9v2h3v3h2V7h3V5h-3V2z"/></svg>
-                        <span id="btn-text">Ajouter au panier</span>
+                    <button onclick="addToCart()" class="flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM7 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zm0-3l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM5.21 6h14.65l-2.76 5H8.53L5.21 6z"/><path d="M12 2v3H9v2h3v3h2V7h3V5h-3V2z"/></svg>
+                        Ajouter au panier
                     </button>
                 </div>
 
-                <button onclick="openModal()" class="w-full py-4 bg-eva-burgundy hover:bg-[#5a2031] text-white rounded-2xl font-bold transition-all text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <button onclick="openModal()" class="w-full py-4 bg-eva-burgundy hover:bg-eva-burgundy-dark text-white rounded-2xl font-bold transition-all text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                     Voir le panier | عرض السلة
                 </button> 
             </div>
@@ -167,15 +150,12 @@
         </div>
     </main>
 
-    <!-- CHECKOUT MODAL : Nouveau système d'animation (Backdrop-blur + Scale) -->
-    <div id="checkout-modal-container" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-        <!-- Overlay -->
-        <div id="checkout-overlay" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 modal-overlay cursor-pointer" onclick="closeModal()"></div>
+    <div id="checkout-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
         
-        <!-- Modal Content -->
-        <div id="checkout-content" class="relative w-[95%] max-w-2xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden opacity-0 scale-95 modal-content">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden overflow-y-auto">
             
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-eva-beige sticky top-0 z-10">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-eva-beige">
                 <h2 class="text-xl font-bold text-eva-burgundy">Finaliser la commande</h2>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-eva-burgundy bg-white rounded-full p-2 shadow-sm transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -318,40 +298,6 @@
             cart: JSON.parse(localStorage.getItem('evastouch_cart')) || []
         };
 
-        // --- NOUVEAU SYSTÈME DE TOAST ---
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
-            const icon = type === 'error' 
-                ? `<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
-                : `<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-
-            toast.className = `toast-enter ${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 font-medium pointer-events-auto`;
-            toast.innerHTML = `<div class="flex-shrink-0">${icon}</div><div class="flex-grow text-sm pr-2">${message}</div>`;
-            
-            container.appendChild(toast);
-
-            // Animate In
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    toast.classList.remove('toast-enter');
-                    toast.classList.add('toast-enter-active');
-                });
-            });
-
-            // Animate Out after 3s
-            setTimeout(() => {
-                toast.classList.remove('toast-enter-active');
-                toast.classList.add('toast-leave-active');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300); // Wait for transition
-            }, 3000);
-        }
-
-        // --- INIT PRODUCT AVEC ANIMATIONS HOVER ---
         function initProduct() {
             const container = document.getElementById('variant-selector');
             container.innerHTML = '';
@@ -361,15 +307,17 @@
                 const isOutOfStock = variant.stock === 0;
                 const isActive = state.selectedVariant.id === variant.id;
 
-                // Ajout des classes hover:scale-110 pour l'animation au survol
-                btn.className = `w-full py-2 px-4 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 active:scale-95 text-center font-medium ${isActive ? 'border-gray-900 bg-gray-50 text-gray-900 shadow-sm scale-105' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`;
+                // Nouveau design commun pour TOUS les boutons (en stock ou non)
+                btn.className = `w-full py-1 px-4 rounded-2xl border-2 transition-all duration-300 text-center font-medium ${isActive ? 'border-gray-900 bg-gray-50 text-gray-900 shadow-sm' : 'border-gray-200 hover:border-gray-900 text-gray-700'}`;
                 
+                // Si rupture, on barre simplement le texte, mais le bouton reste normal
                 if (isOutOfStock) {
                     btn.innerHTML = `<span style="text-decoration: line-through; opacity: 0.6;">${variant.name}</span>`;
                 } else {
                     btn.innerHTML = variant.name;
                 }
                 
+                // L'action au clic est la même pour tous : on change la photo
                 btn.onclick = () => {
                     state.selectedVariant = variant;
                     initProduct();
@@ -381,18 +329,22 @@
             const colorNameDisplay = document.getElementById('selected-color-name');
             if (colorNameDisplay) colorNameDisplay.innerText = state.selectedVariant.name;
             updateCartBadge();
-            
-            // Restauration de l'état du bouton (utile si en rupture)
-            const addToCartBtn = document.getElementById('add-to-cart-btn');
-            if (addToCartBtn && state.selectedVariant.stock === 0) {
-                addToCartBtn.disabled = true;
-                document.getElementById('btn-text').innerText = 'Rupture de stock';
-                addToCartBtn.className = "flex-1 h-[52px] bg-gray-300 text-gray-500 rounded-2xl font-bold flex items-center justify-center cursor-not-allowed";
-            } else if (addToCartBtn) {
-                addToCartBtn.disabled = false;
-                document.getElementById('btn-text').innerText = 'Ajouter au panier';
-                addToCartBtn.className = "flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-md";
-            }
+            // Logique du bouton Ajouter au Panier
+            const addToCartBtn = document.querySelector('button[onclick="addToCart()"]');
+            if (addToCartBtn) {
+                if (state.selectedVariant.stock === 0) {
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.innerHTML = 'Rupture de stock';
+                    addToCartBtn.className = "flex-1 h-[52px] bg-gray-300 text-gray-500 rounded-2xl font-bold flex items-center justify-center cursor-not-allowed";
+                } else {
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.innerHTML = `
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zM7 18c-1.11 0-2 .89-2 2s.89 2 2 2 2-.89 2-2-.89-2-2-2zm0-3l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM5.21 6h14.65l-2.76 5H8.53L5.21 6z"/><path d="M12 2v3H9v2h3v3h2V7h3V5h-3V2z"/></svg>
+                        Ajouter au panier
+                    `;
+                    addToCartBtn.className = "flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors";
+                }
+            } 
         }
 
         function changeCurrentQty(change) {
@@ -403,7 +355,6 @@
             }
         }
 
-        // --- BOUTON D'AJOUT ANIMÉ & AJOUT PANIER ---
         function addToCart() {
             if (!state.selectedVariant) return;
 
@@ -413,8 +364,30 @@
             const qtyInCart = existingItem ? existingItem.qty : 0;
             const requestedQty = parseInt(state.currentQty);
 
+const totalPanier = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
+    if (totalPanier + requestedQty > 11) {
+        const overlay = document.createElement('div');
+        // Fond sombre et centrage
+        overlay.className = "fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-60 p-5";
+        // Contenu du pop-up blanc avec icône, texte et bouton
+        overlay.innerHTML = `
+            <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm text-center flex flex-col items-center gap-3">
+                <div class="text-red-500 bg-red-50 p-4 rounded-full mb-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Commande spéciale</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    Oups, ce n'est pas possible de passer cette commande ici sur le site.<br><br>
+                    Merci de nous contacter via message direct sur notre page Instagram <b>@_evastouch_</b> ou sur notre WhatsApp <b>+213 555398801</b>
+                </p>
+                <button onclick="this.closest('.fixed').remove()" class="mt-4 w-full bg-gray-900 text-white rounded-2xl py-3.5 font-bold text-[15px]">Compris</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        return;
+    } 
             if (currentVariant.stock !== undefined && (qtyInCart + requestedQty) > currentVariant.stock) {
-                showToast(`Il ne reste que ${currentVariant.stock} article(s) en stock pour cette couleur.`, 'error');
+            showToast("Oups, il ne reste pas autant de pièces dans le stock.", "error");
                 return; 
             }
 
@@ -438,51 +411,32 @@
 
             localStorage.setItem('evastouch_cart', JSON.stringify(state.cart));
             updateCartBadge();
-            
-            // Animation du bouton "Ajouter"
-            const btn = document.getElementById('add-to-cart-btn');
-            const icon = document.getElementById('btn-icon');
-            const text = document.getElementById('btn-text');
-            
-            // Sauvegarde de l'état d'origine
-            const originalClass = "flex-1 h-[52px] bg-black hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-md";
-            const originalIconHTML = icon.innerHTML;
-            
-            // État "Ajouté"
-            btn.className = "flex-1 h-[52px] bg-green-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-lg transform scale-105";
-            text.innerText = "Ajouté ! ✅";
-            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none" stroke="currentColor" d="M5 13l4 4L19 7"></path>`;
-            
-            showToast("Article ajouté au panier !");
+           // Affiche la bulle de succès
+    showToast("Article ajouté au panier !", "success");
 
-            // Retour à la normale après 2s
-            setTimeout(() => {
-                if (btn) {
-                    btn.className = originalClass;
-                    text.innerText = "Ajouter au panier";
-                    icon.innerHTML = originalIconHTML;
-                }
-            }, 2000);
+    // Anime le bouton "Ajouter au panier"
+    const btn = document.querySelector('button[onclick="addToCart()"]');
+    if (btn) {
+        const texteOriginal = btn.innerHTML;
+        btn.innerHTML = '✓ Ajouté ! ✅';
+        btn.classList.add('!bg-green-500', '!text-white');
+        
+        setTimeout(() => {
+            btn.innerHTML = texteOriginal;
+            btn.classList.remove('!bg-green-500', '!text-white');
+        }, 3000);
+    } 
         } 
 
-        // --- ANIMATION BOUNCE DU PANIER ---
         function updateCartBadge() {
-            const badgeContainer = document.getElementById('cart-badge-container');
             const badge = document.getElementById('cart-count');
-            if (!badgeContainer || !badge) return;
-            
+            if (!badge) return;
             const totalItems = state.cart.reduce((sum, item) => sum + parseInt(item.qty), 0);
-            
             if (totalItems > 0) {
                 badge.innerText = totalItems;
-                badgeContainer.classList.remove('hidden');
-                
-                // Retirer puis rajouter la classe d'animation pour rejouer l'effet Pop
-                badgeContainer.classList.remove('animate-bounce-pop');
-                void badgeContainer.offsetWidth; // Trigger reflow
-                badgeContainer.classList.add('animate-bounce-pop');
+                badge.classList.remove('hidden');
             } else {
-                badgeContainer.classList.add('hidden');
+                badge.classList.add('hidden');
             }
         }
 
@@ -492,9 +446,8 @@
             updateCartBadge();
             if (state.cart.length === 0) {
                 closeModal();
-                showToast("Votre panier est désormais vide.", "error");
             } else {
-                openModal(); // Rafraichir le rendu interne sans animer la modal entière
+                openModal();
             }
         }
 
@@ -506,7 +459,7 @@
 
                 if (newQty > 0) {
                     if (change > 0 && currentVariant.stock !== undefined && newQty > currentVariant.stock) {
-                        showToast(`Désolé, il ne reste que ${currentVariant.stock} article(s) en stock pour cette couleur.`, "error");
+                        alert(`Désolé, il ne reste que ${currentVariant.stock} article(s) en stock pour cette couleur.`);
                         return;
                     }
                     state.cart[itemIndex].qty = newQty;
@@ -516,20 +469,13 @@
                 
                 localStorage.setItem('evastouch_cart', JSON.stringify(state.cart));
                 updateCartBadge();
-                
-                if (state.cart.length === 0) {
-                    closeModal();
-                    showToast("Votre panier est désormais vide.", "error");
-                } else {
-                    openModal(); 
-                }
+                openModal(); 
             }
         } 
             
-        // --- NOUVELLES ANIMATIONS DE MODAL (Fade In + Backdrop Blur + Scale Up) ---
         function openModal() {
             if (state.cart.length === 0) {
-                showToast("Votre panier est vide.", 'error');
+                alert("Votre panier est vide.");
                 return;
             }
             
@@ -554,7 +500,7 @@
                         </div>
                     </div>
                     <div class="text-right flex flex-col items-end justify-between h-full">
-                        <button type="button" onclick="removeFromCart('${item.variant}')" class="text-gray-400 hover:text-red-500 p-1 mb-1 transition-colors">
+                        <button type="button" onclick="removeFromCart('${item.variant}')" class="text-gray-400 hover:text-red-500 p-1 mb-1">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                         <p class="font-bold text-gray-900">${item.price * item.qty} DZD</p>
@@ -563,23 +509,8 @@
                 itemsContainer.insertAdjacentHTML('beforeend', itemHTML);
             });
 
-            const container = document.getElementById('checkout-modal-container');
-            const overlay = document.getElementById('checkout-overlay');
-            const content = document.getElementById('checkout-content');
-
-            // Afficher le conteneur global
-            container.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // block scroll
-            
-            // Animation via classe utilitaire (Next frame)
-            requestAnimationFrame(() => {
-                overlay.classList.remove('opacity-0');
-                overlay.classList.add('opacity-100');
-                
-                content.classList.remove('opacity-0', 'scale-95');
-                content.classList.add('opacity-100', 'scale-100');
-            });
-
+            document.getElementById('checkout-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
             document.getElementById('success-state').classList.add('hidden');
             document.getElementById('checkout-form').classList.remove('hidden');
             document.getElementById('modal-footer').classList.remove('hidden');
@@ -589,22 +520,8 @@
         } 
 
         function closeModal() {
-            const container = document.getElementById('checkout-modal-container');
-            const overlay = document.getElementById('checkout-overlay');
-            const content = document.getElementById('checkout-content');
-
-            // Lancer l'animation de sortie
-            overlay.classList.remove('opacity-100');
-            overlay.classList.add('opacity-0');
-            
-            content.classList.remove('opacity-100', 'scale-100');
-            content.classList.add('opacity-0', 'scale-95');
-
-            // Attendre la fin de l'animation CSS (0.4s) pour masquer le display
-            setTimeout(() => {
-                container.classList.add('hidden');
-                document.body.style.overflow = 'auto'; // unblock scroll
-            }, 400);
+            document.getElementById('checkout-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
         // --- YALIDINE API LOGIC ---
@@ -828,7 +745,7 @@
 
             if (isFormComplete) {
                 btn.disabled = false;
-                btn.className = "w-full h-[52px] bg-eva-burgundy hover:bg-eva-burgundyLight text-white cursor-pointer rounded-2xl font-bold flex items-center justify-center mt-6 transition-all shadow-lg transform hover:-translate-y-1 active:scale-95";
+                btn.className = "w-full h-[52px] bg-eva-burgundy hover:bg-eva-burgundy-dark text-white cursor-pointer rounded-2xl font-bold flex items-center justify-center mt-6 transition-colors shadow-lg";
             } else {
                 btn.disabled = true;
                 btn.className = "w-full h-[52px] bg-gray-300 text-gray-500 cursor-not-allowed rounded-2xl font-bold flex items-center justify-center mt-6 transition-colors";
@@ -839,7 +756,7 @@
             const phoneCheck = document.getElementById('phone').value.trim();
             const regexTelephone = /^(05|06|07)[0-9]{8}$/;
             if (!regexTelephone.test(phoneCheck)) {
-                showToast("Veuillez vérifier votre numéro. Il doit commencer par 05, 06 ou 07 et contenir exactement 10 chiffres.", 'error');
+                alert("Veuillez vérifier votre numéro. Il doit commencer par 05, 06 ou 07 et contenir exactement 10 chiffres.");
                 return;
             }
             
@@ -858,17 +775,17 @@
             const deskName = (deliveryType === 'desk' && deskSelect && deskSelect.selectedIndex > 0) ? deskSelect.options[deskSelect.selectedIndex].text : '';
 
             if (!firstName || !lastName || !phone || !wilaya || !commune || !deliveryType) {
-                showToast("Veuillez remplir tous les champs obligatoires et choisir un mode de livraison.", "error");
+                alert("Veuillez remplir tous les champs obligatoires et choisir un mode de livraison.");
                 return;
             }
 
             if (deliveryType === 'home' && !address) {
-                showToast("Veuillez saisir votre adresse détaillée pour la livraison à domicile.", "error");
+                alert("Veuillez saisir votre adresse détaillée pour la livraison à domicile.");
                 return;
             }
 
             if (deliveryType === 'desk' && !deskName) {
-                showToast("Veuillez sélectionner un bureau Yalidine dans la liste.", "error");
+                alert("Veuillez sélectionner un bureau Yalidine dans la liste.");
                 return;
             }
 
@@ -887,13 +804,13 @@
                 }));
 
                 let totalGeneral = document.getElementById('summary-total').innerText;
-                let sousTotal = document.getElementById('summary-subtotal').innerText; 
+                let sousTotal = document.getElementById('summary-subtotal').innerText; // NOUVELLE LIGNE
                 
                 const orderData = {
                     customer: { firstName, lastName, phone },
                     items: itemsArray,
                     total: totalGeneral,
-                    subtotal: sousTotal,
+                    subtotal: sousTotal, // NOUVELLE LIGNE
                     delivery: { 
                         type: deliveryType,
                         wilayaName: wilaya,
@@ -921,7 +838,7 @@
                 
             } catch (error) {
                 console.error("Erreur de commande:", error);
-                showToast('‼️ Impossible de confirmer la commande. Vérifiez votre connexion.', 'error');
+                alert('‼️ Impossible de confirmer la commande. Vérifiez votre connexion.');
             } finally {
                 btn.disabled = false;
                 document.getElementById('submit-text').classList.remove('hidden');
@@ -954,6 +871,39 @@
 
         document.addEventListener('DOMContentLoaded', fetchStockAndInit);
 
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+
+    let baseClasses = "flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm transition-all duration-300 transform -translate-y-4 opacity-0 pointer-events-auto";
+
+    let iconSvg = '';
+    if (type === 'success') {
+        toast.className = `${baseClasses} bg-green-500`;
+        iconSvg = `<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+    } else {
+        toast.className = `${baseClasses} bg-red-500`;
+        iconSvg = `<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+    }
+
+    toast.innerHTML = `${iconSvg} <span>${message}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove('-translate-y-4', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+    }, 10);
+
+    setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-4', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+} 
+        
     </script>
+    
+    <div id="toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-3 pointer-events-none w-[90%] max-w-sm"></div> 
+
 </body>
 </html> 
