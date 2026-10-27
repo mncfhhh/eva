@@ -80,6 +80,37 @@
     .fade-in-section { 
         animation: fadeIn 0.4s ease-out forwards; 
     } 
+        /* Animation du cercle qui se dessine */
+    .anim-check-circle {
+        stroke-dasharray: 160;
+        stroke-dashoffset: 160;
+        animation: drawCheck 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    /* Remplissage doux en arrière-plan */
+    .anim-check-fill {
+        animation: fillCheck 0.4s ease-out 0.5s forwards;
+    }
+    /* Animation de la coche qui se dessine */
+    .anim-check-path {
+        stroke-dasharray: 50;
+        stroke-dashoffset: 50;
+        animation: drawCheck 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.7s forwards;
+    }
+    /* Halo lumineux autour (Glow) */
+    .anim-check-glow {
+        animation: glowCheck 1.5s ease-out 0.7s infinite alternate forwards;
+    }
+
+    @keyframes drawCheck {
+        to { stroke-dashoffset: 0; }
+    }
+    @keyframes fillCheck {
+        to { fill: #f0fdf4; } /* Correspond à green-50 */
+    }
+    @keyframes glowCheck {
+        0% { opacity: 0; transform: scale(0.9); }
+        100% { opacity: 0.4; transform: scale(1.2); }
+    } 
     </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
@@ -176,9 +207,20 @@
             <div class="p-6 overflow-y-auto hide-scrollbar flex-grow bg-white">
                 
                <div id="success-state" class="hidden flex-col items-center justify-center py-12 text-center w-full min-h-[350px]">
-                    <div class="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-inner mx-auto success-icon-anim"> 
-                        <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
+                    <div class="relative w-24 h-24 mb-6 mx-auto flex items-center justify-center">
+                        <!-- Le halo lumineux (glow) en arrière-plan -->
+                        <div class="absolute inset-0 bg-green-400 rounded-full filter blur-xl opacity-0 anim-check-glow"></div>
+                        
+                        <!-- L'icône SVG animée -->
+                        <svg class="relative z-10 w-24 h-24" viewBox="0 0 52 52">
+                            <!-- Le cercle qui se dessine -->
+                            <circle class="anim-check-circle" cx="26" cy="26" r="24" fill="none" stroke="#22c55e" stroke-width="2"/>
+                            <!-- Le fond qui se remplit -->
+                            <circle class="anim-check-fill" cx="26" cy="26" r="24" fill="transparent" />
+                            <!-- La coche qui se dessine -->
+                            <path class="anim-check-path" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M15 27l7 7 15-15"/>
+                        </svg>
+                    </div> 
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Commande confirmée !</h3>
                     <p class="text-gray-600 mb-8 font-cairo text-lg" dir="rtl">شكرا لثقتكم. سنتصل بكم قريبا لتأكيد الطلب 🌸</p>
                     <button onclick="closeModal()" class="bg-eva-burgundy hover:bg-eva-burgundyLight text-white px-10 py-4 rounded-xl font-bold transition-colors w-full md:w-auto shadow-lg shadow-eva-pink">Retourner à la boutique</button>
