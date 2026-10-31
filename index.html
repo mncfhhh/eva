@@ -277,6 +277,11 @@
                     </div> 
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Commande confirmée !</h3>
                     <p class="text-gray-600 mb-8 font-cairo text-lg" dir="rtl">شكرا لثقتكم. سنتصل بكم قريبا لتأكيد الطلب 🌸</p>
+                    <div id="fx-receipt" class="fx-receipt hidden w-full">
+                        <div class="fx-slot"></div>
+                        <div class="fx-receipt-clip"><div id="fx-paper" class="fx-paper"></div></div>
+                        <button type="button" id="fx-dl" class="fx-dl">⬇ Télécharger le reçu • تحميل الوصل</button>
+                    </div>
                     <button onclick="closeModal()" class="bg-eva-burgundy hover:bg-eva-burgundyLight text-white px-10 py-4 rounded-xl font-bold transition-colors w-full md:w-auto shadow-lg shadow-eva-pink">Retourner à la boutique</button>
                 </div>
 
@@ -1238,6 +1243,53 @@ function showToast(message, type = 'success') {
 #success-state p{animation:fx-up .6s cubic-bezier(.16,1,.3,1) 1.6s both}
 #success-state button{animation:fx-up .6s cubic-bezier(.16,1,.3,1) 1.7s both}
 
+/* --- Reçu --- */
+@keyframes fx-print{from{transform:translateY(-100%)}to{transform:none}}
+.fx-receipt{max-width:320px;margin:0 auto 24px}
+.fx-slot{position:relative;z-index:2;height:8px;border-radius:9999px;background:#7a2e44}
+.fx-receipt-clip{overflow:hidden;margin:-3px 8px 0;padding-bottom:12px}
+.fx-paper{background:#fff;padding:18px 16px 24px;text-align:left;font-size:13px;color:#374151;border-top:5px solid #f8c8d4;filter:drop-shadow(0 6px 8px rgba(122,46,68,.15));clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),91.667% 100%,83.333% calc(100% - 8px),75.000% 100%,66.667% calc(100% - 8px),58.333% 100%,50.000% calc(100% - 8px),41.667% 100%,33.333% calc(100% - 8px),25.000% 100%,16.667% calc(100% - 8px),8.333% 100%,0.000% calc(100% - 8px));animation:fx-print 1.3s cubic-bezier(.22,.8,.3,1) 2.2s both}
+.fx-r-brand{font-weight:700;font-size:18px;color:#7a2e44;text-align:center}
+.fx-r-sub{text-align:center;font-size:11px;color:#9ca3af}
+.fx-r-hr{border-top:2px dashed #e5e7eb;margin:10px 0}
+.fx-r-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.fx-r-row small{display:block;color:#9ca3af;font-size:11px}
+.fx-r-tot{font-weight:700;font-size:16px;color:#7a2e44}
+.fx-r-info{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
+.fx-r-info span:first-child{color:#9ca3af}
+.fx-r-info span:last-child{text-align:right;word-break:break-word}
+.fx-r-note{text-align:center;margin-top:12px;font-size:12px;color:#7a2e44}
+.fx-dl{display:block;width:100%;margin-top:14px;padding:12px;border:2px solid #7a2e44;border-radius:14px;background:#fff;color:#7a2e44;font-weight:700;font-size:14px}
+.fx-dl:active{background:#fbe4ea}
+#success-state #fx-dl{animation-delay:3.2s}
+
+/* --- Feuille du bas + recherche --- */
+@keyframes fx-sheet-in{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fx-sheet-out{to{transform:translateY(100%)}}
+.fx-sel-btn{position:absolute;inset:0;width:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:16px;border-radius:12px;color:#9ca3af;-webkit-tap-highlight-color:transparent}
+.fx-sel-btn:active{background:rgba(122,46,68,.06)}
+.fx-sheet{position:fixed;inset:0;z-index:700}
+.fx-sheet-bd{position:absolute;inset:0;background:rgba(17,24,39,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:fadeIn .25s ease-out}
+.fx-sheet.is-out .fx-sheet-bd{animation:fx-out .28s ease-in forwards}
+.fx-sheet-panel{position:absolute;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;max-height:85vh;display:flex;flex-direction:column;padding:0 16px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.2);animation:fx-sheet-in .42s cubic-bezier(.16,1,.3,1)}
+.fx-sheet.is-out .fx-sheet-panel{animation:fx-sheet-out .28s ease-in forwards}
+.fx-sheet-head{touch-action:none;cursor:grab;padding:10px 0 4px}
+.fx-sheet-grip{width:44px;height:5px;margin:0 auto 12px;border-radius:9999px;background:#e5e7eb}
+.fx-sheet-title{margin-bottom:12px;text-align:center;font-weight:700;font-size:17px;color:#7a2e44}
+.fx-sheet-q{width:100%;margin-bottom:8px;padding:14px 18px;border:2px solid #f3f4f6;border-radius:14px;background:#f9fafb;font-size:16px;outline:none}
+.fx-sheet-q:focus{border-color:#7a2e44;background:#fff}
+.fx-sheet-list{position:relative;flex:1;min-height:120px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.fx-sheet-row{display:block;width:100%;padding:14px 12px;border-radius:12px;text-align:left;font-weight:500;color:#1f2937;transition:background-color .15s,transform .15s}
+.fx-sheet-row:active{background:#fbe4ea;transform:scale(.98)}
+.fx-sheet-row.is-sel{background:#fdf6f2;color:#7a2e44;font-weight:700}
+.fx-sheet-row.is-sel::after{content:"✓";float:right}
+.fx-sheet-empty{padding:28px 12px;text-align:center;color:#9ca3af}
+.fx-sheet-img{width:100%;margin-top:8px;border-radius:14px}
+
+/* --- Maintien sur +/− --- */
+button[onclick^="changeCurrentQty"]{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;border-radius:9999px;transition:background-color .2s,color .2s}
+button[onclick^="changeCurrentQty"].fx-hold{background:#fbe4ea;color:#7a2e44}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .petals{display:none}
@@ -1324,6 +1376,7 @@ openModal=function(){
   _open.apply(this,arguments);
   if(!modal.classList.contains('hidden'))updateProgress();
   if(!was||modal.classList.contains('hidden'))return;
+  {const rc=$('#fx-receipt');if(rc)rc.classList.add('hidden')}
   const bd=$('#modal-backdrop');bd.classList.remove('backdrop-exit');retrigger(bd,'backdrop-in');
   const items=[...$('#checkout-cart-items').children];
   const secs=[...$('#checkout-form').children].filter(e=>e.id!=='checkout-cart-items'&&!e.classList.contains('hidden'));
@@ -1435,6 +1488,212 @@ removeFromCart=function(variantName){
   const item=idx>-1?Object.assign({},state.cart[idx]):null;
   _rm.apply(this,arguments);
   if(item)showUndo(item,idx);
+};
+
+/* ===== Utilitaires ===== */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+
+/* ===== Feuille du bas (réutilisée) ===== */
+function createSheet(title,onClose){
+  const root=document.createElement('div');root.className='fx-sheet';
+  root.innerHTML='<div class="fx-sheet-bd"></div><div class="fx-sheet-panel" role="dialog"><div class="fx-sheet-head"><div class="fx-sheet-grip"></div><div class="fx-sheet-title"></div></div></div>';
+  const panel=root.querySelector('.fx-sheet-panel'),head=root.querySelector('.fx-sheet-head');
+  root.querySelector('.fx-sheet-title').textContent=title;
+  const vv=window.visualViewport;
+  const fit=()=>{if(!vv)return;panel.style.bottom=Math.max(0,innerHeight-vv.height-vv.offsetTop)+'px';panel.style.maxHeight=Math.round(vv.height*.85)+'px'};
+  const onKey=e=>{if(e.key==='Escape')close()};
+  let closed=false;
+  function close(){
+    if(closed)return;closed=true;
+    root.classList.add('is-out');
+    if(vv){vv.removeEventListener('resize',fit);vv.removeEventListener('scroll',fit)}
+    document.removeEventListener('keydown',onKey);
+    if(onClose)onClose();
+    setTimeout(()=>root.remove(),300);
+  }
+  root.querySelector('.fx-sheet-bd').onclick=close;
+  if(vv){vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);fit()}
+  document.addEventListener('keydown',onKey);
+  let y0=null;
+  head.addEventListener('pointerdown',e=>{y0=e.clientY;try{head.setPointerCapture(e.pointerId)}catch(_){}panel.style.transition='none'});
+  head.addEventListener('pointermove',e=>{if(y0!==null)panel.style.transform='translateY('+Math.max(0,e.clientY-y0)+'px)'});
+  const end=e=>{
+    if(y0===null)return;
+    const dy=e.clientY-y0;y0=null;
+    if(dy>90){panel.style.transition='';close()}
+    else{panel.style.transition='transform .25s cubic-bezier(.16,1,.3,1)';panel.style.transform=''}
+  };
+  head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
+  document.body.appendChild(root);
+  return {panel,close};
+}
+
+/* ===== Wilaya / commune avec recherche ===== */
+const norm=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function openSelectSheet(sel,title){
+  if(document.querySelector('.fx-sheet'))return;
+  let mo=null;
+  const sh=createSheet(title,()=>{if(mo)mo.disconnect()});
+  const inp=document.createElement('input');inp.type='search';inp.className='fx-sheet-q';inp.placeholder='Rechercher • بحث';inp.autocomplete='off';
+  const list=document.createElement('div');list.className='fx-sheet-list';
+  sh.panel.append(inp,list);
+  const render=()=>{
+    const q=norm(inp.value.trim());
+    const opts=[...sel.options].filter(o=>o.value!=='');
+    const rows=opts.filter(o=>!q||norm(o.text).includes(q));
+    list.innerHTML=!opts.length?'<div class="fx-sheet-empty">Chargement… • جار التحميل</div>'
+      :!rows.length?'<div class="fx-sheet-empty">Aucun résultat • لا توجد نتائج</div>'
+      :rows.map(o=>'<button type="button" class="fx-sheet-row'+(o.value===sel.value?' is-sel':'')+'" data-v="'+esc(o.value)+'">'+esc(o.text)+'</button>').join('');
+  };
+  render();
+  inp.addEventListener('input',render);
+  mo=new MutationObserver(render);mo.observe(sel,{childList:true});
+  list.onclick=e=>{
+    const r=e.target.closest('.fx-sheet-row');if(!r)return;
+    sel.value=r.dataset.v;
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+    retrigger(sel,'fx-pop');
+    sh.close();
+  };
+  requestAnimationFrame(()=>{const s=list.querySelector('.is-sel');if(s)list.scrollTop=s.offsetTop-list.clientHeight/2});
+}
+function enhanceSelect(id,title){
+  const sel=document.getElementById(id);if(!sel)return;
+  sel.style.pointerEvents='none';
+  const b=document.createElement('button');b.type='button';b.className='fx-sel-btn';b.setAttribute('aria-label',title);
+  b.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  b.onclick=()=>{
+    if(sel.disabled){showToast("Choisissez d'abord une wilaya • اختر الولاية أولا","error");retrigger(sel,'fx-shake');return}
+    openSelectSheet(sel,title);
+  };
+  sel.parentElement.appendChild(b);
+}
+enhanceSelect('wilaya','Choisir la wilaya • الولاية');
+enhanceSelect('commune','Choisir la commune • البلدية');
+
+/* ===== Maintien sur + / − ===== */
+function holdRepeat(btn,dir){
+  let t1,t2,held=false,delay=170;
+  const stop=()=>{clearTimeout(t1);clearTimeout(t2);btn.classList.remove('fx-hold')};
+  const step=()=>{
+    if((dir>0&&state.currentQty>=12)||(dir<0&&state.currentQty<=1)){stop();retrigger($('#display-current-qty'),'fx-shake');return}
+    changeCurrentQty(dir);
+    if(navigator.vibrate)navigator.vibrate(6);
+    delay=Math.max(70,delay-12);
+    t2=setTimeout(step,delay);
+  };
+  btn.addEventListener('pointerdown',()=>{held=false;delay=170;t1=setTimeout(()=>{held=true;btn.classList.add('fx-hold');step()},380)});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>btn.addEventListener(ev,stop));
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+  btn.addEventListener('click',e=>{if(held){e.stopImmediatePropagation();e.preventDefault();held=false}},true);
+}
+document.querySelectorAll('button[onclick^="changeCurrentQty"]').forEach(b=>holdRepeat(b,/\(-1\)/.test(b.getAttribute('onclick'))?-1:1));
+
+/* ===== Reçu ===== */
+function buildModel(){
+  const txt=id=>{const e=document.getElementById(id);return e?e.textContent.trim():''};
+  const val=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+  const sel=id=>{const e=document.getElementById(id);return e&&e.selectedIndex>0?e.options[e.selectedIndex].text:''};
+  const type=(document.querySelector('input[name="deliveryType"]:checked')||{}).value;
+  const d=new Date();
+  return {
+    date:d.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})+' • '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    stamp:''+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes()),
+    items:state.cart.map(i=>({name:i.name,variant:i.variant,qty:i.qty,price:i.price})),
+    sums:[['Sous-total',txt('summary-subtotal')],['Livraison',txt('summary-shipping')]],
+    total:txt('summary-total'),
+    info:[['Client',(val('firstName')+' '+val('lastName')).trim()],['Téléphone',val('phone')],
+      ['Livraison',type==='desk'?'Bureau Yalidine':'À domicile'],['Wilaya',sel('wilaya')],['Commune',sel('commune')],
+      [type==='desk'?'Bureau':'Adresse',type==='desk'?sel('desk'):val('address')],['Paiement','À la livraison']]
+  };
+}
+function receiptHTML(m){
+  return '<div class="fx-r-brand">Eva\'s Touch 🌸</div><div class="fx-r-sub">Reçu de commande • وصل الطلب</div><div class="fx-r-sub">'+esc(m.date)+'</div><div class="fx-r-hr"></div>'
+   +m.items.map(i=>'<div class="fx-r-row"><span><b>'+i.qty+'×</b> '+esc(i.name)+'<small>'+esc(i.variant)+'</small></span><span>'+(i.price*i.qty)+' DZD</span></div>').join('')
+   +'<div class="fx-r-hr"></div>'
+   +m.sums.map(r=>'<div class="fx-r-row"><span>'+r[0]+'</span><span>'+esc(r[1])+'</span></div>').join('')
+   +'<div class="fx-r-row fx-r-tot"><span>TOTAL</span><span>'+esc(m.total)+'</span></div><div class="fx-r-hr"></div>'
+   +m.info.filter(r=>r[1]).map(r=>'<div class="fx-r-info"><span>'+r[0]+'</span><span>'+esc(r[1])+'</span></div>').join('')
+   +'<div class="fx-r-note">On vous appelle bientôt pour confirmer 🌸<br>سنتصل بكم قريبا لتأكيد الطلب</div>';
+}
+async function receiptPNG(m){
+  try{await document.fonts.load('600 20px Poppins');await document.fonts.load('700 20px Poppins')}catch(_){}
+  const W=600,S=2,P=52,FF='Poppins, Cairo, sans-serif';
+  const lay=c=>{
+    let y=104;
+    const f=(w,sz)=>{c.font=w+' '+sz+'px '+FF};
+    const t=(s,x,al,col,w,sz)=>{f(w,sz);c.fillStyle=col;c.textAlign=al;c.fillText(s,x,y)};
+    const hr=()=>{c.strokeStyle='#e5e7eb';c.lineWidth=2;c.setLineDash([8,6]);c.beginPath();c.moveTo(P,y);c.lineTo(W-P,y);c.stroke();c.setLineDash([]);y+=32};
+    const wrap=(s,max,w,sz)=>{f(w,sz);const out=[];let l='';s.split(' ').forEach(x=>{const n=l?l+' '+x:x;if(c.measureText(n).width>max&&l){out.push(l);l=x}else l=n});out.push(l);return out};
+    t("Eva's Touch 🌸",W/2,'center','#7a2e44',700,40);
+    y+=34;t('Reçu de commande • وصل الطلب',W/2,'center','#6b7280',500,21);
+    y+=30;t(m.date,W/2,'center','#9ca3af',400,18);
+    y+=30;hr();
+    m.items.forEach(i=>{
+      wrap(i.qty+'× '+i.name,340,600,22).forEach((l,k)=>{if(k)y+=28;t(l,P,'left','#1f2937',600,22);if(!k)t((i.price*i.qty)+' DZD',W-P,'right','#1f2937',600,22)});
+      y+=26;t(i.variant,P,'left','#9ca3af',400,18);y+=40;
+    });
+    y-=16;hr();
+    m.sums.forEach(r=>{t(r[0],P,'left','#6b7280',500,20);t(r[1],W-P,'right','#374151',600,20);y+=36});
+    t('TOTAL',P,'left','#7a2e44',700,26);t(m.total,W-P,'right','#7a2e44',700,28);
+    y+=30;hr();
+    m.info.filter(r=>r[1]).forEach(r=>{
+      t(r[0],P,'left','#9ca3af',500,18);
+      wrap(r[1],330,500,19).forEach((l,k)=>{if(k)y+=26;t(l,W-P,'right','#374151',500,19)});
+      y+=36;
+    });
+    y-=4;hr();
+    t('On vous appelle bientôt pour confirmer 🌸',W/2,'center','#7a2e44',600,19);
+    y+=32;t('سنتصل بكم قريبا لتأكيد الطلب',W/2,'center','#7a2e44',600,19);
+    y+=48;t('Instagram @_evastouch_  •  WhatsApp +213 555398801',W/2,'center','#9ca3af',400,15);
+    return y+64;
+  };
+  const H=Math.ceil(lay(document.createElement('canvas').getContext('2d')));
+  const cv=document.createElement('canvas');cv.width=W*S;cv.height=H*S;
+  const c=cv.getContext('2d');c.scale(S,S);
+  c.fillStyle='#fdf6f2';c.fillRect(0,0,W,H);
+  c.save();c.shadowColor='rgba(122,46,68,.18)';c.shadowBlur=18;c.shadowOffsetY=6;c.fillStyle='#fff';
+  c.beginPath();c.moveTo(22,22);c.lineTo(W-22,22);c.lineTo(W-22,H-40);
+  const tw=(W-44)/28;
+  for(let i=1;i<=28;i++)c.lineTo(W-22-i*tw,i%2?H-22:H-40);
+  c.closePath();c.fill();c.restore();
+  c.fillStyle='#7a2e44';c.fillRect(22,22,W-44,10);
+  lay(c);
+  return new Promise(res=>cv.toBlob(res,'image/png'));
+}
+async function downloadReceipt(m){
+  const blob=await receiptPNG(m);if(!blob)return;
+  const name='recu-evas-touch-'+m.stamp+'.png';
+  const ua=navigator.userAgent;
+  const ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const inapp=/FBAN|FBAV|Instagram/.test(ua);
+  const file=new File([blob],name,{type:'image/png'});
+  if(ios&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:"Reçu Eva's Touch"})}catch(_){}
+    return;
+  }
+  const url=URL.createObjectURL(blob);
+  if(inapp){
+    const sh=createSheet('Maintenez appuyé sur le reçu puis « Enregistrer » • اضغط مطولا للحفظ',()=>setTimeout(()=>URL.revokeObjectURL(url),500));
+    const im=document.createElement('img');im.src=url;im.className='fx-sheet-img';sh.panel.appendChild(im);
+    return;
+  }
+  const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+function showReceipt(m){
+  const rc=$('#fx-receipt'),paper=$('#fx-paper');if(!rc||!paper)return;
+  paper.innerHTML=receiptHTML(m);
+  $('#fx-dl').onclick=()=>downloadReceipt(m);
+  rc.classList.remove('hidden');
+  setTimeout(()=>{if(!rc.classList.contains('hidden'))rc.scrollIntoView({behavior:'smooth',block:'center'})},3000);
+}
+const _sub=submitOrder;
+submitOrder=async function(){
+  const m=buildModel();
+  await _sub.apply(this,arguments);
+  if(!$('#success-state').classList.contains('hidden'))showReceipt(m);
 };
 }catch(err){console.warn('fx-layer:',err)}
 })();
