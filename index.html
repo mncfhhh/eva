@@ -1290,6 +1290,9 @@ function showToast(message, type = 'success') {
 button[onclick^="changeCurrentQty"]{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;border-radius:9999px;transition:background-color .2s,color .2s}
 button[onclick^="changeCurrentQty"].fx-hold{background:#fbe4ea;color:#7a2e44}
 
+.fx-r-track{text-align:center;font-size:12px;color:#374151}
+.fx-r-code{display:block;margin:8px auto 0;padding:8px 14px;border:2px dashed #f8c8d4;border-radius:12px;background:#fdf6f2;color:#7a2e44;font-weight:700;font-size:16px;letter-spacing:.04em;cursor:pointer;word-break:break-all}
+.fx-r-track small{display:block;margin-top:4px;color:#9ca3af;font-size:10px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .petals{display:none}
@@ -1615,6 +1618,7 @@ function receiptHTML(m){
    +m.sums.map(r=>'<div class="fx-r-row"><span>'+r[0]+'</span><span>'+esc(r[1])+'</span></div>').join('')
    +'<div class="fx-r-row fx-r-tot"><span>TOTAL</span><span>'+esc(m.total)+'</span></div><div class="fx-r-hr"></div>'
    +m.info.filter(r=>r[1]).map(r=>'<div class="fx-r-info"><span>'+r[0]+'</span><span>'+esc(r[1])+'</span></div>').join('')
+   +(m.tracking?'<div class="fx-r-hr"></div><div class="fx-r-track">Vous pouvez suivre l\'envoi de votre commande avec ce tracking Yalidine :<br>يمكنكم تتبع الشحنة برقم التتبع هذا<span class="fx-r-code" role="button" tabindex="0" data-t="'+esc(m.tracking)+'">'+esc(m.tracking)+'</span><small>Touchez pour copier • اضغط للنسخ</small></div>':'')
    +'<div class="fx-r-note">On vous appelle bientôt pour confirmer 🌸<br>سنتصل بكم قريبا لتأكيد الطلب</div>';
 }
 async function receiptPNG(m){
@@ -1644,6 +1648,16 @@ async function receiptPNG(m){
       y+=36;
     });
     y-=4;hr();
+    if(m.tracking){
+      wrap("Vous pouvez suivre l'envoi de votre commande avec ce tracking Yalidine :",W-2*P,500,19).forEach((l,k)=>{if(k)y+=26;t(l,W/2,'center','#374151',500,19)});
+      y+=28;t('يمكنكم تتبع الشحنة برقم التتبع هذا',W/2,'center','#6b7280',500,18);
+      y+=50;f(700,30);
+      const w=c.measureText(m.tracking).width+56;
+      c.beginPath();(c.roundRect||c.rect).call(c,(W-w)/2,y-38,w,58,14);
+      c.fillStyle='#fdf6f2';c.fill();c.strokeStyle='#f8c8d4';c.lineWidth=2;c.setLineDash([8,6]);c.stroke();c.setLineDash([]);
+      t(m.tracking,W/2,'center','#7a2e44',700,30);
+      y+=56;hr();
+    }
     t('On vous appelle bientôt pour confirmer 🌸',W/2,'center','#7a2e44',600,19);
     y+=32;t('سنتصل بكم قريبا لتأكيد الطلب',W/2,'center','#7a2e44',600,19);
     y+=48;t('Instagram @_evastouch_  •  WhatsApp +213 555398801',W/2,'center','#9ca3af',400,15);
@@ -1686,14 +1700,38 @@ function showReceipt(m){
   const rc=$('#fx-receipt'),paper=$('#fx-paper');if(!rc||!paper)return;
   paper.innerHTML=receiptHTML(m);
   $('#fx-dl').onclick=()=>downloadReceipt(m);
+  paper.onclick=e=>{
+    const b=e.target.closest('.fx-r-code');if(!b)return;
+    const v=b.dataset.t;
+    (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>{b.textContent='Copié ✓';retrigger(b,'fx-pop');setTimeout(()=>{b.textContent=v},1500)}).catch(()=>{});
+  };
   rc.classList.remove('hidden');
   setTimeout(()=>{if(!rc.classList.contains('hidden'))rc.scrollIntoView({behavior:'smooth',block:'center'})},3000);
+}
+let orderResp=null;
+const _fetch=window.fetch;
+window.fetch=function(u){
+  const p=_fetch.apply(window,arguments);
+  if(String(u).includes('/order-telegram'))orderResp=p.then(r=>r.clone().json()).catch(()=>null);
+  return p;
+};
+function findTracking(o,d){
+  d=d||0;
+  if(!o||typeof o!=='object'||d>4)return '';
+  for(const k of Object.keys(o)){const v=o[k];if(/track/i.test(k)&&(typeof v==='string'||typeof v==='number')&&String(v).trim())return String(v).trim()}
+  for(const k of Object.keys(o)){const r=findTracking(o[k],d+1);if(r)return r}
+  return '';
 }
 const _sub=submitOrder;
 submitOrder=async function(){
   const m=buildModel();
+  orderResp=null;
   await _sub.apply(this,arguments);
-  if(!$('#success-state').classList.contains('hidden'))showReceipt(m);
+  if(!$('#success-state').classList.contains('hidden')){
+    let j=null;try{j=orderResp?await orderResp:null}catch(_){}
+    m.tracking=findTracking(j);
+    showReceipt(m);
+  }
 };
 }catch(err){console.warn('fx-layer:',err)}
 })();
